@@ -1,0 +1,7 @@
+services:
+  tv-frontend:
+    build: .
+    ports:
+      # Exponemos el puerto 3000 del host
+      - "3000:80"
+    restart: always
