@@ -5,7 +5,11 @@ import 'features/tv_control/presentation/device_selection_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint("Advertencia: No se encontró el archivo .env o falló su lectura.");
+  }
   runApp(const ProviderScope(child: MyApp()));
 }
 
