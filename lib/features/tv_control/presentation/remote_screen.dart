@@ -76,9 +76,9 @@ class RemoteScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                   _BaseBtn(icon: Icons.arrow_back, label: 'Back', onPressed: () => _executeCommand(ref, 4)),
-                   _BaseBtn(icon: Icons.home_filled, label: 'Home', onPressed: () => _executeCommand(ref, 3)),
-                   _BaseBtn(icon: Icons.menu, label: 'Menú', onPressed: () => _executeCommand(ref, 82)),
+                   _BaseBtn(icono: Icons.arrow_back, label: 'Back', onPressed: () => _executeCommand(ref, 4)),
+                   _BaseBtn(icono: Icons.home_filled, label: 'Home', onPressed: () => _executeCommand(ref, 3)),
+                   _BaseBtn(icono: Icons.menu, label: 'Menú', onPressed: () => _executeCommand(ref, 82)),
                 ],
               ),
               const SizedBox(height: 20),
@@ -87,9 +87,9 @@ class RemoteScreen extends ConsumerWidget {
               Row(
                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                  children: [
-                   _BaseBtn(icon: Icons.volume_down, label: 'Vol-', onPressed: () => _executeCommand(ref, 25)),
-                   _BaseBtn(icon: Icons.play_arrow, label: 'Play/Pause', onPressed: () => _executeCommand(ref, 85)),
-                   _BaseBtn(icon: Icons.volume_up, label: 'Vol+', onPressed: () => _executeCommand(ref, 24)),
+                   _BaseBtn(icono: Icons.volume_down, label: 'Vol-', onPressed: () => _executeCommand(ref, 25)),
+                   _BaseBtn(icono: Icons.play_arrow, label: 'Play/Pause', onPressed: () => _executeCommand(ref, 85)),
+                   _BaseBtn(icono: Icons.volume_up, label: 'Vol+', onPressed: () => _executeCommand(ref, 24)),
                  ],
               ),
               const SizedBox(height: 40),
@@ -196,10 +196,10 @@ class _DPadWidget extends StatelessWidget {
 }
 
 class _DirBtn extends StatelessWidget {
-  final IconData icon;
+  final IconData icono;
   final VoidCallback onTap;
 
-  const _DirBtn(this.icon, this.onTap);
+  const _DirBtn(this.icono, this.onTap);
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +210,7 @@ class _DirBtn extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(15.0),
-          child: Icon(icon, color: Colors.white70, size: 40),
+          child: Icon(icono, color: Colors.white70, size: 40),
         ),
       ),
     );
@@ -218,11 +218,11 @@ class _DirBtn extends StatelessWidget {
 }
 
 class _BaseBtn extends StatelessWidget {
-  final IconData icon;
+  final IconData icono;
   final String label;
   final VoidCallback onPressed;
 
-  const _BaseBtn({required this.icon, required this.label, required this.onPressed});
+  const _BaseBtn({required this.icono, required this.label, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -230,7 +230,7 @@ class _BaseBtn extends StatelessWidget {
       children: [
         IconButton(
           onPressed: onPressed,
-          icon: Icon(icon, size: 28, color: Colors.white),
+          icon: Icon(icono, size: 28, color: Colors.white),
           style: IconButton.styleFrom(
             backgroundColor: const Color(0xFF2A2A2A),
             padding: const EdgeInsets.all(16),
@@ -245,17 +245,17 @@ class _BaseBtn extends StatelessWidget {
 
 class _DeepLinkChip extends StatelessWidget {
   final String label;
-  final Color color;
+  final Color chipColor;
   final VoidCallback onTap;
 
-  const _DeepLinkChip(this.label, this.color, this.onTap);
+  const _DeepLinkChip(this.label, this.chipColor, this.onTap);
 
   @override
   Widget build(BuildContext context) {
     return ActionChip(
       backgroundColor: const Color(0xFF2A2A2A),
-      side: BorderSide(color: color.withOpacity(0.5)),
-      label: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+      side: BorderSide(color: chipColor.withOpacity(0.5)),
+      label: Text(label, style: TextStyle(color: chipColor, fontWeight: FontWeight.bold)),
       onPressed: onTap,
     );
   }
