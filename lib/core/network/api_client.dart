@@ -14,9 +14,9 @@ class ApiClient {
     // La URL base del microservicio es fija (la PC donde corre el backend).
     final serviceUrl = dotenv.env['MICROSERVICE_URL'] ?? '';
     dio.options.baseUrl = serviceUrl;
-    dio.options.connectTimeout = const Duration(seconds: 3);
-    dio.options.receiveTimeout = const Duration(seconds: 30);
-    dio.options.sendTimeout = const Duration(seconds: 3);
+    dio.options.connectTimeout = const Duration(seconds: 60);
+    dio.options.receiveTimeout = const Duration(seconds: 60);
+    dio.options.sendTimeout = const Duration(seconds: 10);
 
     dio.interceptors.add(
       InterceptorsWrapper(
