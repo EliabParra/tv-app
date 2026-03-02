@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 
@@ -66,6 +68,32 @@ class TvRepository {
       return response.statusCode == 200;
     } catch (_) {
       return false;
+    }
+  }
+
+  /// Control de encendido/apagado
+  Future<bool> powerControl(String action) async {
+    try {
+      final response = await _apiClient.dio.post('/tv/power/$action');
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Captura de pantalla del Fire TV. Devuelve los bytes PNG o null si falla.
+  Future<Uint8List?> takeScreenshot() async {
+    try {
+      final response = await _apiClient.dio.get(
+        '/tv/screenshot',
+        options: Options(responseType: ResponseType.bytes),
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return Uint8List.fromList(response.data as List<int>);
+      }
+      return null;
+    } catch (_) {
+      return null;
     }
   }
 }

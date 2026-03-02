@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,15 +8,72 @@ import 'device_selection_screen.dart';
 class RemoteScreen extends ConsumerWidget {
   const RemoteScreen({super.key});
 
-  /// Ejecuta un comando ADB con feedback
+  /// Ejecuta un keyevent — fire-and-forget (sin await = instantáneo)
   void _executeCommand(WidgetRef ref, int keycode) {
     HapticFeedback.lightImpact();
     ref.read(tvControllerProvider.notifier).pressButton(keycode);
   }
 
+  /// Ejecuta control de media vía endpoint dedicado
+  void _mediaCommand(WidgetRef ref, String control) {
+    HapticFeedback.lightImpact();
+    ref.read(tvControllerProvider.notifier).sendMediaControl(control);
+  }
+
   void _launchApp(WidgetRef ref, String packageName) {
     HapticFeedback.mediumImpact();
     ref.read(tvControllerProvider.notifier).launchApp(packageName);
+  }
+
+  void _showScreenshot(BuildContext context, WidgetRef ref) async {
+    HapticFeedback.mediumImpact();
+
+    // Mostrar loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator(color: Colors.blueAccent)),
+    );
+
+    final bytes = await ref.read(tvControllerProvider.notifier).takeScreenshot();
+    
+    if (!context.mounted) return;
+    Navigator.of(context).pop(); // Cerrar loading
+
+    if (bytes != null) {
+      _displayScreenshotDialog(context, bytes);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error al capturar pantalla'), backgroundColor: Colors.redAccent),
+      );
+    }
+  }
+
+  void _displayScreenshotDialog(BuildContext context, Uint8List bytes) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: Colors.black,
+        insetPadding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppBar(
+              backgroundColor: const Color(0xFF2D2D2D),
+              title: const Text('Screenshot', style: TextStyle(color: Colors.white, fontSize: 16)),
+              leading: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white70),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              automaticallyImplyLeading: false,
+            ),
+            InteractiveViewer(
+              child: Image.memory(bytes, fit: BoxFit.contain),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -24,7 +82,6 @@ class RemoteScreen extends ConsumerWidget {
     final ip = ref.watch(tvControllerProvider).currentIp;
 
     if (status == ConnectionStatus.error) {
-      // Si la conexión cae, devolvemos a selección (Delay necesario para no chocar builds)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const DeviceSelectionScreen()),
@@ -47,6 +104,13 @@ class RemoteScreen extends ConsumerWidget {
           ],
         ),
         actions: [
+          // Screenshot
+          IconButton(
+            icon: const Icon(Icons.screenshot_monitor, color: Colors.white70),
+            tooltip: 'Captura de pantalla',
+            onPressed: () => _showScreenshot(context, ref),
+          ),
+          // Desconectar
           IconButton(
             icon: const Icon(Icons.exit_to_app, color: Colors.white70),
             tooltip: 'Cambiar TV',
@@ -66,11 +130,11 @@ class RemoteScreen extends ConsumerWidget {
             children: [
               // Texto remoto
               _TextInputField(),
-              const SizedBox(height: 30),
+              const SizedBox(height: 24),
               
               // D-PAD Central
               _DPadWidget(executeCommand: (code) => _executeCommand(ref, code)),
-              const SizedBox(height: 30),
+              const SizedBox(height: 24),
               
               // Botones Básicos (Back, Home, Menu)
               Row(
@@ -81,18 +145,29 @@ class RemoteScreen extends ConsumerWidget {
                    _BaseBtn(icono: Icons.menu, label: 'Menú', onPressed: () => _executeCommand(ref, 82)),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
-              // Botones de Media (Volumen, Play)
+              // Volumen + Play/Pause + Mute
               Row(
                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                  children: [
-                   _BaseBtn(icono: Icons.volume_down, label: 'Vol-', onPressed: () => _executeCommand(ref, 25)),
-                   _BaseBtn(icono: Icons.play_arrow, label: 'Play/Pause', onPressed: () => _executeCommand(ref, 85)),
-                   _BaseBtn(icono: Icons.volume_up, label: 'Vol+', onPressed: () => _executeCommand(ref, 24)),
+                   _BaseBtn(icono: Icons.volume_down, label: 'Vol-', onPressed: () => _mediaCommand(ref, 'voldown')),
+                   _BaseBtn(icono: Icons.play_arrow, label: 'Play/Pause', onPressed: () => _mediaCommand(ref, 'playpause')),
+                   _BaseBtn(icono: Icons.volume_up, label: 'Vol+', onPressed: () => _mediaCommand(ref, 'volup')),
                  ],
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 16),
+
+              // Mute + Power
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _BaseBtn(icono: Icons.volume_off, label: 'Mute', onPressed: () => _mediaCommand(ref, 'mute')),
+                  _BaseBtn(icono: Icons.skip_previous, label: 'Prev', onPressed: () => _mediaCommand(ref, 'prev')),
+                  _BaseBtn(icono: Icons.skip_next, label: 'Next', onPressed: () => _mediaCommand(ref, 'next')),
+                ],
+              ),
+              const SizedBox(height: 30),
               
               const Divider(color: Colors.white24),
               const SizedBox(height: 10),
@@ -111,7 +186,8 @@ class RemoteScreen extends ConsumerWidget {
                   _DeepLinkChip('YouTube', Colors.white, () => _launchApp(ref, 'com.amazon.firetv.youtube')),
                   _DeepLinkChip('Prime Video', Colors.blue, () => _launchApp(ref, 'com.amazon.avod')),
                 ],
-              )
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -134,10 +210,10 @@ class _TextInputField extends ConsumerWidget {
         contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 15),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
       ),
-      onSubmitted: (value) async {
+      onSubmitted: (value) {
         if (value.trim().isNotEmpty) {
            HapticFeedback.lightImpact();
-           await ref.read(tvControllerProvider.notifier).inputText(value.trim());
+           ref.read(tvControllerProvider.notifier).inputText(value.trim());
         }
       },
     );

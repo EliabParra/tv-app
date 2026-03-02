@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../repositories/tv_repository.dart';
@@ -38,21 +39,14 @@ class TvController extends Notifier<TvState> {
   }
 
   /// Registra la IP del televisor Fire TV seleccionado y verifica la conexión
-  /// contra el microservicio, propagando la IP via header [x-device-ip].
   Future<void> setTargetIp(String ip) async {
-    // 1. Estado de carga + guardar IP
     state = state.copyWith(status: ConnectionStatus.loading, currentIp: ip);
-
-    // 2. Informar al apiClient la IP activa del televisor
-    //    (se inyectará en el header x-device-ip de cada petición).
     ref.read(apiClientProvider).setDeviceIp(ip);
 
-    // 3. Verificar que el microservicio está vivo
     final repo = ref.read(tvRepositoryProvider);
     final isHealthy = await repo.checkHealth();
 
     if (isHealthy) {
-      // 4. Intentar conectar el dispositivo vía ADB desde el microservicio
       await repo.connectDevice();
       state = state.copyWith(status: ConnectionStatus.connected);
     } else {
@@ -66,28 +60,40 @@ class TvController extends Notifier<TvState> {
     state = TvState.initial();
   }
 
-  /// Oprime botón direccional/control si estamos conectados
-  Future<void> pressButton(int code) async {
+  /// Botón de control remoto — fire-and-forget para máxima velocidad
+  void pressButton(int code) {
     if (state.status != ConnectionStatus.connected) return;
-    await ref.read(tvRepositoryProvider).sendKeyEvent(code);
+    ref.read(tvRepositoryProvider).sendKeyEvent(code);
   }
 
-  /// Control Media si estamos conectados
-  Future<void> sendMediaControl(String controlCommand) async {
+  /// Control Media — fire-and-forget
+  void sendMediaControl(String controlCommand) {
     if (state.status != ConnectionStatus.connected) return;
-    await ref.read(tvRepositoryProvider).mediaControl(controlCommand);
+    ref.read(tvRepositoryProvider).mediaControl(controlCommand);
   }
 
   /// Lanza una aplicación de AndroidTV instalada
-  Future<void> launchApp(String packageName) async {
+  void launchApp(String packageName) {
     if (state.status != ConnectionStatus.connected) return;
-    await ref.read(tvRepositoryProvider).openApp(packageName);
+    ref.read(tvRepositoryProvider).openApp(packageName);
   }
 
   /// Escribe texto remoto en el campo enfocado del TV
-  Future<void> inputText(String text) async {
+  void inputText(String text) {
     if (state.status != ConnectionStatus.connected || text.isEmpty) return;
-    await ref.read(tvRepositoryProvider).sendText(text);
+    ref.read(tvRepositoryProvider).sendText(text);
+  }
+
+  /// Control de encendido/apagado
+  void powerControl(String action) {
+    if (state.status != ConnectionStatus.connected) return;
+    ref.read(tvRepositoryProvider).powerControl(action);
+  }
+
+  /// Captura de pantalla del TV. Retorna los bytes PNG o null.
+  Future<Uint8List?> takeScreenshot() async {
+    if (state.status != ConnectionStatus.connected) return null;
+    return await ref.read(tvRepositoryProvider).takeScreenshot();
   }
 }
 
