@@ -6,11 +6,10 @@ class TvRepository {
 
   TvRepository(this._apiClient);
 
-  /// Verifica si el televisor bajo la IP configurada está accesible
+  /// Verifica si el microservicio está accesible (endpoint raíz /health)
   Future<bool> checkHealth() async {
     try {
       final response = await _apiClient.dio.get('/health');
-      // Esperamos respuesta exitosa para confirmar que el backend está vivo
       return response.statusCode == 200;
     } catch (_) {
       return false;
@@ -20,7 +19,7 @@ class TvRepository {
   /// Inicia conexión ADB con el TV a través del microservicio
   Future<bool> connectDevice() async {
     try {
-      final response = await _apiClient.dio.post('/connect');
+      final response = await _apiClient.dio.post('/tv/connect');
       return response.statusCode == 200;
     } catch (_) {
       return false;
@@ -30,7 +29,7 @@ class TvRepository {
   /// Envía un keyevent genérico 
   Future<bool> sendKeyEvent(int code) async {
     try {
-      final response = await _apiClient.dio.post('/keyevent/$code');
+      final response = await _apiClient.dio.post('/tv/keyevent/$code');
       return response.statusCode == 200;
     } catch (_) {
       return false;
@@ -40,7 +39,7 @@ class TvRepository {
   /// Envía un comando para abrir una App en específico por nombre de paquete
   Future<bool> openApp(String packageName) async {
     try {
-      final response = await _apiClient.dio.post('/app/$packageName');
+      final response = await _apiClient.dio.post('/tv/app/$packageName');
       return response.statusCode == 200;
     } catch (_) {
       return false;
@@ -51,7 +50,7 @@ class TvRepository {
   Future<bool> sendText(String text) async {
     try {
       final response = await _apiClient.dio.post(
-        '/text',
+        '/tv/text',
         data: {'text': text},
       );
       return response.statusCode == 200;
@@ -63,7 +62,7 @@ class TvRepository {
   /// Control de medios genérico (Play, Pause, etc.)
   Future<bool> mediaControl(String control) async {
     try {
-      final response = await _apiClient.dio.post('/media/$control');
+      final response = await _apiClient.dio.post('/tv/media/$control');
       return response.statusCode == 200;
     } catch (_) {
       return false;
