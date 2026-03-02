@@ -82,11 +82,16 @@ class TvRepository {
   }
 
   /// Captura de pantalla del Fire TV. Devuelve los bytes PNG o null si falla.
+  /// Timeout extendido porque el servidor bufferea la imagen completa (~12s).
   Future<Uint8List?> takeScreenshot() async {
     try {
       final response = await _apiClient.dio.get(
         '/tv/screenshot',
-        options: Options(responseType: ResponseType.bytes),
+        options: Options(
+          responseType: ResponseType.bytes,
+          sendTimeout: const Duration(seconds: 60),
+          receiveTimeout: const Duration(seconds: 60),
+        ),
       );
       if (response.statusCode == 200 && response.data != null) {
         return Uint8List.fromList(response.data as List<int>);
