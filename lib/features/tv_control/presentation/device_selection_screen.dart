@@ -73,7 +73,7 @@ class _DeviceSelectionScreenState extends ConsumerState<DeviceSelectionScreen> {
                    ),
                    const SizedBox(height: 10),
                    const Text(
-                     'Ingresa la IP local del dispositivo Fire TV',
+                     'Ingresa la IP del televisor Fire TV',
                      style: TextStyle(fontSize: 14, color: Colors.white70),
                    ),
                    const SizedBox(height: 40),
@@ -82,14 +82,16 @@ class _DeviceSelectionScreenState extends ConsumerState<DeviceSelectionScreen> {
                      keyboardType: TextInputType.numberWithOptions(decimal: true),
                      style: const TextStyle(color: Colors.white),
                      decoration: InputDecoration(
-                       labelText: 'Dirección IP (ej. 192.168.1.55)',
+                       labelText: 'IP del Fire TV (ej. 192.168.X.X)',
+                       hintText: '192.168.1.55',
+                       hintStyle: const TextStyle(color: Colors.white30),
                        labelStyle: const TextStyle(color: Colors.white70),
                        border: OutlineInputBorder(
                          borderRadius: BorderRadius.circular(12),
                        ),
                        filled: true,
                        fillColor: Colors.white10,
-                       prefixIcon: const Icon(Icons.wifi, color: Colors.white54),
+                       prefixIcon: const Icon(Icons.tv, color: Colors.white54),
                      ),
                      validator: (value) {
                        if (value == null || value.trim().isEmpty) {

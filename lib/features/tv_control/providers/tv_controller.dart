@@ -37,30 +37,32 @@ class TvController extends Notifier<TvState> {
     return TvState.initial();
   }
 
-  /// Cambia la IP del SDK subyacente y verifica la conexión contra el TV microservicio
+  /// Registra la IP del televisor Fire TV seleccionado y verifica la conexión
+  /// contra el microservicio, propagando la IP via header [x-device-ip].
   Future<void> setTargetIp(String ip) async {
-    // 1. Mostrar estado de carga y guardar IP
+    // 1. Estado de carga + guardar IP
     state = state.copyWith(status: ConnectionStatus.loading, currentIp: ip);
 
-    // 2. Modificar el cliente API (Singleton dentro del ProviderScope)
-    ref.read(apiClientProvider).updateBaseUrl(ip);
+    // 2. Informar al apiClient la IP activa del televisor
+    //    (se inyectará en el header x-device-ip de cada petición).
+    ref.read(apiClientProvider).setDeviceIp(ip);
 
-    // 3. Chequear Health del microservicio
+    // 3. Verificar que el microservicio está vivo
     final repo = ref.read(tvRepositoryProvider);
     final isHealthy = await repo.checkHealth();
 
     if (isHealthy) {
-      // 4. Intentamos conectar el dispositivo vía ADB desde el microservicio
-      await repo.connectDevice(); // Lo hacemos en background, si falla no importa, ADB puede estar ya pareado
+      // 4. Intentar conectar el dispositivo vía ADB desde el microservicio
+      await repo.connectDevice();
       state = state.copyWith(status: ConnectionStatus.connected);
     } else {
-      // 5. El TV no responde, revertir
       state = state.copyWith(status: ConnectionStatus.error);
     }
   }
 
   /// Limpia la IP guardada y regresa al estado en reposo
   void disconnect() {
+    ref.read(apiClientProvider).setDeviceIp('');
     state = TvState.initial();
   }
 
@@ -82,7 +84,7 @@ class TvController extends Notifier<TvState> {
     await ref.read(tvRepositoryProvider).openApp(packageName);
   }
 
-  /// Escribir texto remoto
+  /// Escribe texto remoto en el campo enfocado del TV
   Future<void> inputText(String text) async {
     if (state.status != ConnectionStatus.connected || text.isEmpty) return;
     await ref.read(tvRepositoryProvider).sendText(text);
