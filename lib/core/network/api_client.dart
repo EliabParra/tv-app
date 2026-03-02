@@ -15,7 +15,7 @@ class ApiClient {
     final serviceUrl = dotenv.env['MICROSERVICE_URL'] ?? '';
     dio.options.baseUrl = serviceUrl;
     dio.options.connectTimeout = const Duration(seconds: 3);
-    dio.options.receiveTimeout = const Duration(seconds: 10);
+    dio.options.receiveTimeout = const Duration(seconds: 30);
     dio.options.sendTimeout = const Duration(seconds: 3);
 
     dio.interceptors.add(

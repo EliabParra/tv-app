@@ -90,6 +90,18 @@ class TvController extends Notifier<TvState> {
     ref.read(tvRepositoryProvider).powerControl(action);
   }
 
+  /// Ajustar volumen (up/down) usando endpoint dedicado
+  void adjustVolume(String action) {
+    if (state.status != ConnectionStatus.connected) return;
+    ref.read(tvRepositoryProvider).adjustVolume(action);
+  }
+
+  /// Toggle mute
+  void toggleMute() {
+    if (state.status != ConnectionStatus.connected) return;
+    ref.read(tvRepositoryProvider).toggleMute();
+  }
+
   /// Captura de pantalla del TV. Retorna los bytes PNG o null.
   Future<Uint8List?> takeScreenshot() async {
     if (state.status != ConnectionStatus.connected) return null;

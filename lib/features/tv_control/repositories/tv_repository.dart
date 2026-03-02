@@ -96,6 +96,26 @@ class TvRepository {
       return null;
     }
   }
+
+  /// Ajustar volumen usando endpoint dedicado (service call audio en Fire TV)
+  Future<bool> adjustVolume(String action) async {
+    try {
+      final response = await _apiClient.dio.post('/tv/volume/$action');
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Toggle mute usando media dispatch mute
+  Future<bool> toggleMute() async {
+    try {
+      final response = await _apiClient.dio.post('/tv/mute');
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
 }
 
 /// Proveedor de Riverpod del repositorio inyectando el apiClient

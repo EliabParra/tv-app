@@ -159,13 +159,19 @@ class RemoteScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
 
-              // Media: Volumen + Play/Pause (todos por keyevent directo)
+              // Media: Volumen + Play/Pause
               Row(
                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                  children: [
-                   _BaseBtn(icono: Icons.volume_down, label: 'Vol-', onPressed: () => _key(ref, 25)),
+                   _BaseBtn(icono: Icons.volume_down, label: 'Vol-', onPressed: () {
+                     HapticFeedback.lightImpact();
+                     ref.read(tvControllerProvider.notifier).adjustVolume('down');
+                   }),
                    _BaseBtn(icono: Icons.play_arrow, label: 'Play/Pause', onPressed: () => _key(ref, 85)),
-                   _BaseBtn(icono: Icons.volume_up, label: 'Vol+', onPressed: () => _key(ref, 24)),
+                   _BaseBtn(icono: Icons.volume_up, label: 'Vol+', onPressed: () {
+                     HapticFeedback.lightImpact();
+                     ref.read(tvControllerProvider.notifier).adjustVolume('up');
+                   }),
                  ],
               ),
               const SizedBox(height: 16),
@@ -174,7 +180,10 @@ class RemoteScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _BaseBtn(icono: Icons.volume_off, label: 'Mute', onPressed: () => _key(ref, 164)),
+                  _BaseBtn(icono: Icons.volume_off, label: 'Mute', onPressed: () {
+                    HapticFeedback.lightImpact();
+                    ref.read(tvControllerProvider.notifier).toggleMute();
+                  }),
                   _BaseBtn(icono: Icons.skip_previous, label: 'Prev', onPressed: () => _key(ref, 88)),
                   _BaseBtn(icono: Icons.skip_next, label: 'Next', onPressed: () => _key(ref, 87)),
                 ],
