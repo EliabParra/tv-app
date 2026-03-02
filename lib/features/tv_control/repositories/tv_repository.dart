@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,19 +83,20 @@ class TvRepository {
   }
 
   /// Captura de pantalla del Fire TV. Devuelve los bytes PNG o null si falla.
-  /// Timeout extendido porque el servidor bufferea la imagen completa (~12s).
+  /// El microservicio retorna la imagen como base64 en JSON para compatibilidad
+  /// con Flutter Web (XHR no maneja bien respuestas binarias largas).
   Future<Uint8List?> takeScreenshot() async {
     try {
       final response = await _apiClient.dio.get(
         '/tv/screenshot',
         options: Options(
-          responseType: ResponseType.bytes,
           sendTimeout: const Duration(seconds: 60),
           receiveTimeout: const Duration(seconds: 60),
         ),
       );
       if (response.statusCode == 200 && response.data != null) {
-        return Uint8List.fromList(response.data as List<int>);
+        final base64String = response.data['data'] as String;
+        return base64Decode(base64String);
       }
       return null;
     } catch (_) {
