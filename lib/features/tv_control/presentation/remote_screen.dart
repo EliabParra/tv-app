@@ -159,42 +159,23 @@ class RemoteScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
 
-              // Media: Volumen + Play/Pause
+              // Media: Rewind / Play-Pause / Fast Forward
               Row(
                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                  children: [
-                   _BaseBtn(icono: Icons.volume_down, label: 'Vol-', onPressed: () {
-                     HapticFeedback.lightImpact();
-                     ref.read(tvControllerProvider.notifier).adjustVolume('down');
-                   }),
+                   _BaseBtn(icono: Icons.fast_rewind, label: 'Rewind', onPressed: () => _key(ref, 89)),
                    _BaseBtn(icono: Icons.play_arrow, label: 'Play/Pause', onPressed: () => _key(ref, 85)),
-                   _BaseBtn(icono: Icons.volume_up, label: 'Vol+', onPressed: () {
-                     HapticFeedback.lightImpact();
-                     ref.read(tvControllerProvider.notifier).adjustVolume('up');
-                   }),
+                   _BaseBtn(icono: Icons.fast_forward, label: 'Forward', onPressed: () => _key(ref, 90)),
                  ],
               ),
               const SizedBox(height: 16),
 
-              // Mute + Skip
+              // Sleep / Wake
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _BaseBtn(icono: Icons.volume_off, label: 'Mute', onPressed: () {
-                    HapticFeedback.lightImpact();
-                    ref.read(tvControllerProvider.notifier).toggleMute();
-                  }),
-                  _BaseBtn(icono: Icons.skip_previous, label: 'Prev', onPressed: () => _key(ref, 88)),
-                  _BaseBtn(icono: Icons.skip_next, label: 'Next', onPressed: () => _key(ref, 87)),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Power
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _BaseBtn(icono: Icons.power_settings_new, label: 'Power', onPressed: () => _key(ref, 26)),
+                  _BaseBtn(icono: Icons.bedtime, label: 'Sleep', onPressed: () => _key(ref, 223)),
+                  _BaseBtn(icono: Icons.wb_sunny, label: 'Wake', onPressed: () => _key(ref, 224)),
                 ],
               ),
               const SizedBox(height: 30),
